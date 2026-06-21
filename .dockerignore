@@ -1,0 +1,10 @@
+target
+.git
+.gitignore
+.mimocode
+**/node_modules
+web/dist
+*.md
+Dockerfile
+.dockerignore
+docker-compose.yml

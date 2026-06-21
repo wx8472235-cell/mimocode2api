@@ -1,0 +1,26 @@
+[package]
+name = "mimocode2api"
+version = "0.1.0"
+edition = "2024"
+description = "把小米 MiMo Code 内置的免费模型转换成 OpenAI 兼容 API"
+license = "MIT"
+repository = "https://github.com/wx8472235-cell/mimocode2api"
+readme = "README.md"
+keywords = ["openai", "proxy", "llm", "mimo", "api"]
+categories = ["command-line-utilities", "web-programming::http-server"]
+autotests = false
+
+[dependencies]
+axum = "0.8"
+bytes = "1"
+tokio = { version = "1", features = ["full"] }
+reqwest = { version = "0.12", default-features = false, features = ["rustls-tls", "json", "stream", "gzip", "deflate", "brotli"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = { version = "1", features = ["preserve_order"] }
+tower-http = { version = "0.6", features = ["cors", "trace"] }
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+anyhow = "1"
+thiserror = "2"
+getrandom = "0.3"
+base64 = "0.22"
