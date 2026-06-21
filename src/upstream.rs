@@ -200,7 +200,7 @@ fn is_valid_client(s: &str) -> bool {
             .all(|b| b.is_ascii_hexdigit() && !b.is_ascii_uppercase())
 }
 
-fn random_hex(nbytes: usize) -> String {
+pub(crate) fn random_hex(nbytes: usize) -> String {
     let mut buf = vec![0u8; nbytes];
     getrandom::fill(&mut buf).expect("getrandom 失败");
     buf.iter().map(|b| format!("{:02x}", b)).collect()

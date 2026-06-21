@@ -1,6 +1,6 @@
 [package]
 name = "mimocode2api"
-version = "0.1.0"
+version = "0.2.0"
 edition = "2024"
 description = "把小米 MiMo Code 内置的免费模型转换成 OpenAI 兼容 API"
 license = "MIT"
@@ -24,3 +24,5 @@ anyhow = "1"
 thiserror = "2"
 getrandom = "0.3"
 base64 = "0.22"
+async-stream = "0.3"
+futures-util = "0.3"

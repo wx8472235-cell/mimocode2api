@@ -1,3 +1,4 @@
+mod anthropic;
 mod clock;
 mod config;
 mod proxy;
@@ -38,6 +39,8 @@ async fn main() -> Result<()> {
 
     let app = Router::new()
         .route("/v1/chat/completions", post(proxy::chat_completions))
+        .route("/v1/messages", post(anthropic::messages))
+        .route("/v1/messages/count_tokens", post(anthropic::count_tokens))
         .route("/v1/models", get(proxy::models))
         .route("/health", get(proxy::health))
         .layer(CorsLayer::permissive())

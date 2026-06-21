@@ -32,7 +32,7 @@ jobs:
         with:
           targets: ${{ matrix.target }}
 
-      - name: 安装 cross
+      - name: 安装 cross 交叉编译工具
         if: matrix.use_cross
         shell: bash
         run: |
@@ -40,12 +40,12 @@ jobs:
             https://raw.githubusercontent.com/cargo-bins/cargo-binstall/main/install-from-binstall-release.sh | bash
           cargo binstall --no-confirm cross
 
-      - name: 缓存 cargo 构建产物
+      - name: 缓存 Cargo 构建产物
         uses: Swatinem/rust-cache@v2
         with:
           key: release-${{ matrix.target }}
 
-      - name: 构建(release)
+      - name: 编译 release 二进制
         shell: bash
         env:
           USE_CROSS: ${{ matrix.use_cross }}
@@ -57,7 +57,7 @@ jobs:
             cargo build --release --locked --target "$TARGET"
           fi
 
-      - name: 打包产物
+      - name: 打包二进制
         shell: bash
         env:
           TARGET: ${{ matrix.target }}
@@ -81,13 +81,55 @@ jobs:
           fi
           ls -lh "${STAGING}."*
 
-      - name: 上传到 GitHub Release
+      - name: 上传二进制到 Release
         uses: softprops/action-gh-release@v2
         with:
           files: |
             mimocode2api-*-${{ matrix.target }}.tar.gz
             mimocode2api-*-${{ matrix.target }}.zip
-          generate_release_notes: true
+
+  release-notes:
+    name: 生成发行说明
+    needs: binaries
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: 从提交历史生成变更说明
+        shell: bash
+        run: |
+          set -euo pipefail
+          CUR="${GITHUB_REF_NAME}"
+          PREV="$(git describe --tags --abbrev=0 "${CUR}^" 2>/dev/null || true)"
+          if [ -n "$PREV" ]; then
+            RANGE="${PREV}..${CUR}"
+            LINK="https://github.com/${GITHUB_REPOSITORY}/compare/${PREV}...${CUR}"
+          else
+            RANGE="${CUR}"
+            LINK="https://github.com/${GITHUB_REPOSITORY}/commits/${CUR}"
+          fi
+          {
+            echo "## ${CUR}"
+            echo
+            git log --no-merges --reverse --pretty=tformat:'%H' "$RANGE" | while read -r sha; do
+              echo "**$(git log -1 --pretty=format:'%s' "$sha")**"
+              echo
+              body="$(git log -1 --pretty=format:'%b' "$sha")"
+              if [ -n "$body" ]; then
+                echo "$body"
+                echo
+              fi
+            done
+            echo "**完整变更**:${LINK}"
+          } > RELEASE_NOTES.md
+          cat RELEASE_NOTES.md
+
+      - name: 写入发行说明
+        uses: softprops/action-gh-release@v2
+        with:
+          body_path: RELEASE_NOTES.md
 
   docker:
     name: 构建并推送镜像到 ghcr.io
@@ -115,7 +157,7 @@ jobs:
             type=semver,pattern={{major}}.{{minor}}
             type=raw,value=latest
 
-      - name: 构建并推送
+      - name: 构建并推送镜像
         uses: docker/build-push-action@v6
         with:
           context: .

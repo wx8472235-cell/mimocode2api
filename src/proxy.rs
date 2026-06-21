@@ -11,7 +11,7 @@ use crate::clock;
 use crate::session;
 use crate::upstream::UpstreamClient;
 
-const WHITELIST_PREFIX: &str =
+pub const WHITELIST_PREFIX: &str =
     "You are MiMoCode, an interactive CLI tool that helps users with software engineering tasks.";
 
 #[derive(Clone)]
@@ -107,7 +107,7 @@ fn should_strip_response_header(name: &str) -> bool {
     )
 }
 
-fn inject_whitelist_system(req: &mut Value) {
+pub fn inject_whitelist_system(req: &mut Value) {
     let messages = match req.get_mut("messages").and_then(|m| m.as_array_mut()) {
         Some(m) => m,
         None => {
